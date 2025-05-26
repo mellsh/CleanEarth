@@ -14,6 +14,7 @@ import com.example.cleanearth.ui.MainScreen
 import com.example.cleanearth.ui.UserProfileScreen
 import com.example.cleanearth.ui.theme.CleanEarthTheme
 
+// so tireeeeeeed
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
