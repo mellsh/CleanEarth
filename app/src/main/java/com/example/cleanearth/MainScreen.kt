@@ -27,10 +27,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.cleanearth.R
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun MainScreen(
+    navController: NavController,
     onCheckRecycle: () -> Unit = {},
     onNavigateToSignUp: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {}
@@ -41,7 +45,8 @@ fun MainScreen(
             BottomNav(
                 selectedIndex = 0,
                 onNavigateToSignUp = onNavigateToSignUp,
-                onNavigateToLogin = onNavigateToLogin
+                onNavigateToLogin = onNavigateToLogin,
+                navController = navController
             )
         }
     ) { innerPadding ->
@@ -283,8 +288,13 @@ private fun BottomNav(
     selectedIndex: Int,
     onNavigateToSignUp: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
+    val context = LocalContext.current
+    val sharedPref = context.getSharedPreferences("user", Context.MODE_PRIVATE)
+    val email = sharedPref.getString("email", null)
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -307,7 +317,9 @@ private fun BottomNav(
                         when (label) {
                             "Home" -> onNavigateToSignUp()
                             "Camera" -> {}
-                            "Profile" -> onNavigateToLogin()
+                            "Profile" -> if (email != null) {
+                                navController.navigate("profile/$email")
+                            }
                         }
                     }
                     .padding(horizontal = 12.dp)

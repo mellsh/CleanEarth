@@ -10,6 +10,7 @@ public class LoginHandler {
     }
 
     public boolean login(String email, String password) {
-        return dbHelper.checkUser(email, password);
+        String hashedPassword = HashUtil.sha256(password);
+        return dbHelper.checkUser(email, hashedPassword);
     }
 }

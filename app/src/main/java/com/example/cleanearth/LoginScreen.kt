@@ -1,5 +1,6 @@
 package com.example.cleanearth
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -129,7 +130,9 @@ fun LoginScreen(
                 }
                 loginHandler.login(email, password) -> {
                     errorMessage = ""
-                    navController.navigate("userprofile/${email}") // ✅ 이동!
+                    val sharedPref = context.getSharedPreferences("user", Context.MODE_PRIVATE)
+                    sharedPref.edit().putString("email", email).apply()
+                    navController.navigate("main") // ✅ 이동!
                 }
                 else -> {
                     errorMessage = "이메일 또는 비밀번호가 잘못되었습니다."

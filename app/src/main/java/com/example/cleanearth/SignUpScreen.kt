@@ -156,7 +156,7 @@ fun SignUpScreen(
                     }
                     else -> {
                         if (result) {
-                            navController.navigate("profile/${email}") // 회원가입 성공 → ProfileScreen으로 이동
+                            navController.navigate("signupprofile/$email") // 회원가입 성공 → ProfileScreen으로 이동
                         } else {
                             errorMessage = "이미 등록된 이메일입니다."
                         }

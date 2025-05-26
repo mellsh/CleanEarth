@@ -14,7 +14,8 @@ public class SignupHandler {
         if (userExists(email)) {
             return false;
         }
-        return dbHelper.insertUser(email, password);
+        String hashedPassword = HashUtil.sha256(password);
+        return dbHelper.insertUser(email, hashedPassword);
     }
 
     private boolean userExists(String email) {
