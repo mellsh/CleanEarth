@@ -19,9 +19,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 
 @Composable
 fun SignUpScreen(
+    navController: NavController,
     onNextClicked: () -> Unit = {} // 이동은 나중에 연결할 예정
 ) {
     var email by remember { mutableStateOf("") }
@@ -30,6 +33,8 @@ fun SignUpScreen(
     var errorMessage by remember { mutableStateOf("") }
     val lightGreen = Color(0xFFd4edc9)
     val darkGreen = Color(0xFF4CAF50)
+    val context = LocalContext.current
+    val signupHandler = remember { SignupHandler(context) }
 
     Column(
         modifier = Modifier
@@ -141,6 +146,7 @@ fun SignUpScreen(
 
         Button(
             onClick = {
+                val result = signupHandler.register(email, password)
                 when {
                     email.isBlank() || password.isBlank() || confirmPassword.isBlank() -> {
                         errorMessage = "모든 항목을 입력해주세요."
@@ -149,8 +155,11 @@ fun SignUpScreen(
                         errorMessage = "비밀번호가 일치하지 않습니다."
                     }
                     else -> {
-                        errorMessage = ""
-                        onNextClicked() // 나중에 화면 이동 연결할 부분
+                        if (result) {
+                            navController.navigate("profile/${email}") // 회원가입 성공 → ProfileScreen으로 이동
+                        } else {
+                            errorMessage = "이미 등록된 이메일입니다."
+                        }
                     }
                 }
             },

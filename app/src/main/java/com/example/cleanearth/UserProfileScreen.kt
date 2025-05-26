@@ -9,20 +9,39 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.cleanearth.User
+import com.example.cleanearth.UserProfileHandler
 
 @Composable
-fun UserProfileScreen() {
-    // 예시 프로필 데이터
-    val name = "홍길동"
-    val email = "honggildong@example.com"
-    val dateOfBirth = "1990년 1월 1일"
-    val gender = "Male"
+fun UserProfileScreen(email: String, navController: NavController) {
+    val context = LocalContext.current
+    val userProfileHandler = remember { UserProfileHandler(context) }
+
+    val userState = remember { mutableStateOf<User?>(null) }
+
+    LaunchedEffect(email) {
+        val result = userProfileHandler.getUserProfile(email)
+        userState.value = result
+    }
+
+    val user = userState.value
+    val name = user?.nickname ?: "-"
+    val emailShown = user?.email ?: "-"
+    val dateOfBirth = user?.birthdate ?: "-"
+    val gender = user?.gender ?: "-"
+
+
 
     Surface(
         modifier = Modifier
@@ -67,7 +86,8 @@ fun UserProfileScreen() {
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = { /* TODO: 로그아웃 처리 */ },
+                onClick = { navController.navigate("start") {
+                    popUpTo("userprofile/{email}") { inclusive = true }},
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFa616e9) // 초록색
                 ),

@@ -24,14 +24,20 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 
 @Composable
 fun LoginScreen(
+    navController: NavController,
     onLoginClicked: () -> Unit = {} // 로그인 완료 후 호출
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val loginHandler = remember { LoginHandler(context) }
     val darkGreen = Color(0xFF4CAF50)
 
     Column(
@@ -117,19 +123,18 @@ fun LoginScreen(
         }
 
         Button(
-            onClick = { /* 로그인 여부 판단
-                when {
-                    email.isBlank() || password.isBlank() -> {
-                        errorMessage = "모든 항목을 입력해주세요."
-                        Log.d("LoginScreen", errorMessage)
-                    }
-                    else -> {
-                        errorMessage = ""
-                        Log.d("LoginScreen", "로그인 시도: 이메일=$email")
-                        onLoginClicked()
-                    }
+            onClick = {when {
+                email.isBlank() || password.isBlank() -> {
+                    errorMessage = "모든 항목을 입력해주세요."
                 }
-           */ },
+                loginHandler.login(email, password) -> {
+                    errorMessage = ""
+                    navController.navigate("userprofile/${email}") // ✅ 이동!
+                }
+                else -> {
+                    errorMessage = "이메일 또는 비밀번호가 잘못되었습니다."
+                }
+            }},
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = darkGreen),
             modifier = Modifier

@@ -28,9 +28,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 
 @Composable
 fun ProfileScreen(
+    navController: NavController,
+    email: String,
     onNextClicked: () -> Unit = {}, // 다음 화면으로 이동할 콜백
     onBackClicked: () -> Unit = {}  // 이전 화면으로 돌아갈 콜백
 ) {
@@ -42,6 +46,9 @@ fun ProfileScreen(
 
     val darkGreen = Color(0xFF4CAF50)
     val genderOptions = listOf("남성", "여성", "기타")
+
+    val context = LocalContext.current
+    val profilehandler = remember { ProfileHandler(context) }
 
     Column(
         modifier = Modifier
@@ -178,19 +185,21 @@ fun ProfileScreen(
 
         // 다음 버튼
         Button(
-            onClick = { /*  개인정보 입력 여부 판단
+            onClick = {
                 when {
                     name.isBlank() || gender.isBlank() || birthDate.length != 10 -> {
                         errorMessage = "모든 항목을 입력해주세요."
-                        Log.d("ProfileScreen", errorMessage)
                     }
                     else -> {
-                        errorMessage = ""
-                        Log.d("ProfileScreen", "개인정보 입력 완료: 이름=$name, 성별=$gender, 생년월일=$birthDate")
-                        onNextClicked()
+                        val success = profilehandler.saveProfile(email, name, gender, birthDate)
+                        if (success) {
+                            navController.navigate("login") // ✅ 로그인 화면으로 이동
+                        } else {
+                            errorMessage = "저장에 실패했습니다."
+                        }
                     }
                 }
-           */ },
+           },
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = darkGreen),
             modifier = Modifier

@@ -1,6 +1,10 @@
 package com.example.cleanearth
 
+import android.R.attr.contextUri
 import android.R.attr.fontWeight
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,18 +12,25 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 
 @Composable
-fun StartScreen() {
+fun StartScreen(navController: NavHostController) {
     val lightGreen = Color(0xFFd4edc9)
     val darkGreen = Color(0xFF4CAF50)
 
@@ -76,7 +87,7 @@ fun StartScreen() {
 
             // 버튼들
             Button(
-                onClick = { /* TODO: 로그인 */ },
+                onClick = {navController.navigate("login")},
                 colors = ButtonDefaults.buttonColors(containerColor = darkGreen),
                 shape = RoundedCornerShape(30.dp),
                 modifier = Modifier
@@ -95,7 +106,7 @@ fun StartScreen() {
             }
 
             OutlinedButton(
-                onClick = { /* TODO: 회원가입 */ },
+                onClick = { navController.navigate("signup") },
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = darkGreen),
                 shape = RoundedCornerShape(30.dp),
                 border = BorderStroke(2.dp, darkGreen),
