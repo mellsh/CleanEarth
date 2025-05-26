@@ -140,7 +140,7 @@ fun SignUpScreen(
         }
 
         Button(
-            onClick = { /* 회원가입 여부 판단
+            onClick = {
                 when {
                     email.isBlank() || password.isBlank() || confirmPassword.isBlank() -> {
                         errorMessage = "모든 항목을 입력해주세요."
@@ -153,7 +153,7 @@ fun SignUpScreen(
                         onNextClicked() // 나중에 화면 이동 연결할 부분
                     }
                 }
-            */},
+            },
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = darkGreen),
             modifier = Modifier

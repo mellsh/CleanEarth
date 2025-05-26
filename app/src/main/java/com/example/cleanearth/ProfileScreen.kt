@@ -129,10 +129,21 @@ fun ProfileScreen(
             }
         }
 
-        // 생년월일 입력
+        // 생년월일 입력 (YYYY-MM-DD), 숫자 8개 제한 후 자동 하이픈 삽입
         OutlinedTextField(
             value = birthDate,
-            onValueChange = { birthDate = it },
+            onValueChange = { input ->
+                val digits = input.filter { it.isDigit() }.take(8) // 최대 8자리(YYYYMMDD)
+                val formatted = buildString {
+                    digits.forEachIndexed { index, c ->
+                        append(c)
+                        if ((index == 3 || index == 5) && index != digits.lastIndex) {
+                            append("-")
+                        }
+                    }
+                }
+                birthDate = formatted
+            },
             label = { Text("생년월일 (YYYY-MM-DD)") },
             singleLine = true,
             trailingIcon = {
@@ -169,7 +180,7 @@ fun ProfileScreen(
         Button(
             onClick = { /*  개인정보 입력 여부 판단
                 when {
-                    name.isBlank() || gender.isBlank() || birthDate.isBlank() -> {
+                    name.isBlank() || gender.isBlank() || birthDate.length != 10 -> {
                         errorMessage = "모든 항목을 입력해주세요."
                         Log.d("ProfileScreen", errorMessage)
                     }

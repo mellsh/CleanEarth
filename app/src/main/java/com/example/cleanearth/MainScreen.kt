@@ -296,7 +296,7 @@ private fun BottomNav(
     ) {
         val navItems = listOf(
             "Home" to Icons.Filled.Home,
-            "History" to Icons.Filled.History,
+            "Camera" to Icons.Filled.CameraAlt,
             "Profile" to Icons.Filled.AccountCircle
         )
         navItems.forEachIndexed { index, (label, icon) ->
@@ -306,7 +306,7 @@ private fun BottomNav(
                     .clickable {
                         when (label) {
                             "Home" -> onNavigateToSignUp()
-                            "History" -> {}
+                            "Camera" -> {}
                             "Profile" -> onNavigateToLogin()
                         }
                     }
