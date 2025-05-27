@@ -1,5 +1,5 @@
 // UserProfileScreen.kt
-package com.example.cleanearth.ui
+package com.example.cleanearth.kotlin
 
 import android.content.Context
 import android.util.Log
@@ -22,12 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.cleanearth.User
-import com.example.cleanearth.UserProfileHandler
+import com.example.cleanearth.java.User
+import com.example.cleanearth.java.UserProfileHandler
 
 @Composable
 fun UserProfileScreen(
@@ -38,7 +36,11 @@ fun UserProfileScreen(
     onLogoutClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val userProfileHandler = remember { UserProfileHandler(context) }
+    val userProfileHandler = remember {
+        UserProfileHandler(
+            context
+        )
+    }
 
     val userState = remember { mutableStateOf<User?>(null) }
 

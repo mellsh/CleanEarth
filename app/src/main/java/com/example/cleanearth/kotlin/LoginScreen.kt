@@ -1,7 +1,6 @@
-package com.example.cleanearth
+package com.example.cleanearth.kotlin
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import com.example.cleanearth.java.LoginHandler
 
 @Composable
 fun LoginScreen(
@@ -38,7 +38,11 @@ fun LoginScreen(
     var errorMessage by remember { mutableStateOf("") }
 
     val context = LocalContext.current
-    val loginHandler = remember { LoginHandler(context) }
+    val loginHandler = remember {
+        LoginHandler(
+            context
+        )
+    }
     val darkGreen = Color(0xFF4CAF50)
 
     Column(

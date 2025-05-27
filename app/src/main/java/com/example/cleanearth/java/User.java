@@ -1,4 +1,4 @@
-package com.example.cleanearth;
+package com.example.cleanearth.java;
 
 public class User {
     public String email;

@@ -1,17 +1,12 @@
-package com.example.cleanearth
+package com.example.cleanearth.kotlin
 
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.cleanearth.ui.MainScreen
-import com.example.cleanearth.ui.UserProfileScreen
 import com.example.cleanearth.ui.theme.CleanEarthTheme
 
 // so tireeeeeeed

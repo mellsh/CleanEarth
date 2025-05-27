@@ -1,4 +1,4 @@
-package com.example.cleanearth;
+package com.example.cleanearth.java;
 
 import java.security.MessageDigest;
 

@@ -1,6 +1,5 @@
-package com.example.cleanearth
+package com.example.cleanearth.kotlin
 
-import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,9 +26,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import com.example.cleanearth.java.ProfileHandler
 
 @Composable
 fun ProfileScreen(
@@ -48,7 +47,11 @@ fun ProfileScreen(
     val genderOptions = listOf("남성", "여성", "기타")
 
     val context = LocalContext.current
-    val profilehandler = remember { ProfileHandler(context) }
+    val profilehandler = remember {
+        ProfileHandler(
+            context
+        )
+    }
 
     Column(
         modifier = Modifier

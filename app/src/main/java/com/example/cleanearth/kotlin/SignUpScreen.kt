@@ -1,6 +1,5 @@
-package com.example.cleanearth
+package com.example.cleanearth.kotlin
 
-import android.util.Log.d
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,10 +16,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import com.example.cleanearth.java.SignupHandler
 
 @Composable
 fun SignUpScreen(
@@ -34,7 +33,11 @@ fun SignUpScreen(
     val lightGreen = Color(0xFFd4edc9)
     val darkGreen = Color(0xFF4CAF50)
     val context = LocalContext.current
-    val signupHandler = remember { SignupHandler(context) }
+    val signupHandler = remember {
+        SignupHandler(
+            context
+        )
+    }
 
     Column(
         modifier = Modifier
