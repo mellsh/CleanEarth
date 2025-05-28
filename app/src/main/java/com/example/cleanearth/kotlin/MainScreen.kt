@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.cleanearth.R
 import android.content.Context
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
@@ -36,17 +38,15 @@ fun MainScreen(
     navController: NavController,
     onCheckRecycle: () -> Unit = {},
     onNavigateToSignUp: () -> Unit = {},
-    onNavigateToLogin: () -> Unit = {}
+    onNavigateToLogin: () -> Unit = {},
+    currentRoute: String = "home", // 현재 선택된 탭
+    onTabSelect: (String) -> Unit = {}, // 탭 변경 시 호출
 ) {
     val scrollState = rememberScrollState()
     Scaffold(
         bottomBar = {
-            BottomNav(
-                selectedIndex = 0,
-                onNavigateToSignUp = onNavigateToSignUp,
-                onNavigateToLogin = onNavigateToLogin,
-                navController = navController
-            )
+            BottomNav(currentRoute, onTabSelect, navController)
+
         }
     ) { innerPadding ->
         Column(
@@ -137,7 +137,7 @@ fun MainScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
-                    onClick = onCheckRecycle,
+                    onClick = { navController.navigate("scan") },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF17CFA1)),
                     shape = RoundedCornerShape(24.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -148,6 +148,7 @@ fun MainScreen(
                         modifier = Modifier
                             .size(32.dp)
                             .padding(end = 8.dp)
+
                     )
                     Text(
                         text = "재활용 여부, 지금 확인!",
@@ -283,64 +284,33 @@ private fun RecommendationItem(
 }
 
 @Composable
-private fun BottomNav(
-    selectedIndex: Int,
-    onNavigateToSignUp: () -> Unit,
-    onNavigateToLogin: () -> Unit,
-    modifier: Modifier = Modifier,
+fun BottomNav(
+    currentRoute: String,
+    onTabSelect: (String) -> Unit,
     navController: NavController
 ) {
     val context = LocalContext.current
     val sharedPref = context.getSharedPreferences("user", Context.MODE_PRIVATE)
     val email = sharedPref.getString("email", null)
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .height(64.dp)
-            .padding(horizontal = 8.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceAround,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val navItems = listOf(
-            "Home" to Icons.Filled.Home,
-            "Camera" to Icons.Filled.CameraAlt,
-            "Profile" to Icons.Filled.AccountCircle
+    NavigationBar {
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Home, contentDescription = "홈") },
+            selected = currentRoute == "home",
+            onClick = {},
+            label = { Text("홈") }
         )
-        navItems.forEachIndexed { index, (label, icon) ->
-            val selected = index == selectedIndex
-            Column(
-                modifier = Modifier
-                    .clickable {
-                        when (label) {
-                            "Home" -> onNavigateToSignUp()
-                            "Camera" -> {}
-                            "Profile" -> if (email != null) {
-                                navController.navigate("profile/$email")
-                            }
-                        }
-                    }
-                    .padding(horizontal = 12.dp)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = label,
-                    tint = if (selected) Color(0xFF121717) else Color(0xFF638780),
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = label,
-                    color = if (selected) Color(0xFF121717) else Color(0xFF638780),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-            }
-        }
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.PhotoCamera, contentDescription = "카메라") },
+            selected = currentRoute == "camera",
+            onClick = {navController.navigate("scan")},
+            label = { Text("카메라") }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Person, contentDescription = "프로필") },
+            selected = currentRoute == "profile",
+            onClick = {if (email != null) {
+                navController.navigate("profile/$email")}},
+            label = { Text("프로필") }
+        )
     }
 }

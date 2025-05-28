@@ -145,20 +145,20 @@ fun BottomNavBar(
             onClick = {navController.navigate("main") {
                 popUpTo("userprofile/{email}") { inclusive = false }}},
             icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-            label = { Text("Home") }
+            label = { Text("홈") }
         )
         NavigationBarItem(
             selected = currentRoute == "camera",
             onClick = { onSelect("camera")
                 navController.navigate("scan") },
             icon = { Icon(Icons.Default.CameraAlt, contentDescription = "Scan") },
-            label = { Text("Camera") }
+            label = { Text("카메라") }
         )
         NavigationBarItem(
             selected = currentRoute == "profile",
             onClick = { onSelect("profile") },
             icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-            label = { Text("Profile") }
+            label = { Text("프로필") }
         )
     }
 }

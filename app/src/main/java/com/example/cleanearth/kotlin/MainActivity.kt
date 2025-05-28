@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.cleanearth.CameraPreviewScreen
 import com.example.cleanearth.ui.theme.CleanEarthTheme
 
 // so tireeeeeeed
@@ -49,7 +50,7 @@ class MainActivity : ComponentActivity() {
                         UserProfileScreen(email = emailArg, navController = navController)
                     }
                     // 추후 카메라
-                    composable("scan") { /* ScanScreen(navController) */ }
+                    composable("scan") { CameraPreviewScreen(navController = navController)}
                 }
             }
         }
