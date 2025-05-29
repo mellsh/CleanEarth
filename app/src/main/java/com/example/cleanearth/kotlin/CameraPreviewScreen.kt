@@ -1,5 +1,7 @@
 package com.example.cleanearth;
 
+import com.example.cleanearth.java.SimpleImageAnalyzer
+
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
@@ -30,14 +32,17 @@ import com.example.cleanearth.java.CameraPreview
 import kotlinx.coroutines.delay
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import java.io.File
+import java.io.FileOutputStream
+import java.util.*
 
 @Composable
 fun CameraPreviewScreen(
     onNavigateToSignUp: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
     onNavigateToCamera: () -> Unit = {},
-    currentRoute: String = "scan", // 현재 선택된 탭
-    onTabSelect: (String) -> Unit = {}, // 탭 변경 시 호출
+    currentRoute: String = "scan",
+    onTabSelect: (String) -> Unit = {},
     navController: NavController
 ) {
     val context = LocalContext.current
@@ -48,6 +53,16 @@ fun CameraPreviewScreen(
     var showLoading by remember { mutableStateOf(false) }
     val pictureBitmap = remember { mutableStateOf<Bitmap?>(null) }
     val cameraView = remember { mutableStateOf<CameraPreview?>(null) }
+
+    // Register the Java analysis result listener
+    LaunchedEffect(Unit) {
+        SimpleImageAnalyzer.setAnalysisResultListener(object : SimpleImageAnalyzer.AnalysisResultListener {
+            override fun onAnalysisResult(label: String?, confidence: Float) {
+                Log.d("KotlinReceiver", "Label: $label, Confidence: $confidence")
+                // Compose 상태 등 원하는 처리 수행
+            }
+        })
+    }
 
     LaunchedEffect(Unit) {
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA)
@@ -107,6 +122,37 @@ fun CameraPreviewScreen(
                     .clickable {
                         showLoading = true
                         cameraView.value?.takePicture()
+
+                        cameraView.value?.setPictureCallback { data, _ ->
+                            val bmp = BitmapFactory.decodeByteArray(data, 0, data.size)
+                            pictureBitmap.value = bmp
+
+                            val filename = "captured_${UUID.randomUUID()}.jpg"
+                            val imageDir = File(context.filesDir, "images")
+                            imageDir.mkdirs()
+                            val file = File(imageDir, filename)
+                            try {
+                                FileOutputStream(file).use { out ->
+                                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, out)
+                                }
+                                Log.d("Camera", "사진 저장됨: ${file.absolutePath}")
+                                // Java에 이미지 전달하여 분석 시작
+                                SimpleImageAnalyzer.analyzeImageFile(file.absolutePath, object : SimpleImageAnalyzer.ResultListener {
+                                    override fun onResult(label: String, confidence: Float) {
+                                        Log.d("FlaskResult", "Label: $label, Confidence: $confidence")
+                                        // 여기서 label과 confidence 값을 활용할 수 있습니다.
+                                        showLoading = false
+                                    }
+                                    override fun onError(error: String) {
+                                        Log.e("FlaskResult", "오류 발생: $error")
+                                        showLoading = false
+                                    }
+                                })
+                            } catch (e: Exception) {
+                                Log.e("Camera", "사진 저장 중 오류: ${e.message}")
+                                showLoading = false
+                            }
+                        }
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -120,7 +166,6 @@ fun CameraPreviewScreen(
         }
     }
 }
-
 
 @Composable
 fun LoadingDialog() {

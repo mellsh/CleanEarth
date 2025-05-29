@@ -78,8 +78,32 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void takePicture() {
-        if (camera != null && pictureCallback != null) {
-            camera.takePicture(null, null, pictureCallback);
+        if (camera != null) {
+            camera.takePicture(null, null, new Camera.PictureCallback() {
+                @Override
+                public void onPictureTaken(byte[] data, Camera camera) {
+                    java.io.File pictureFileDir = new java.io.File(getContext().getFilesDir(), "images");
+
+                    if (!pictureFileDir.exists()) {
+                        pictureFileDir.mkdirs();
+                    }
+
+                    String filename = "IMG_" + System.currentTimeMillis() + ".jpg";
+                    java.io.File pictureFile = new java.io.File(pictureFileDir, filename);
+
+                    try (java.io.FileOutputStream fos = new java.io.FileOutputStream(pictureFile)) {
+                        fos.write(data);
+                    } catch (java.io.IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (pictureCallback != null) {
+                        pictureCallback.onPictureTaken(data, camera);
+                    }
+
+                    camera.startPreview();
+                }
+            });
         }
     }
 }
