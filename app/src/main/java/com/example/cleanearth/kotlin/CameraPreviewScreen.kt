@@ -2,15 +2,23 @@ package com.example.cleanearth;
 
 import com.example.cleanearth.java.SimpleImageAnalyzer
 
+import org.json.JSONObject
+import android.hardware.Camera
+
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Looper
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Home
@@ -21,8 +29,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -30,11 +41,14 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.example.cleanearth.java.CameraPreview
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
+import android.os.Handler
+
 
 @Composable
 fun CameraPreviewScreen(
@@ -49,10 +63,17 @@ fun CameraPreviewScreen(
     val activity = context as? Activity
     val darkGreen = Color(0xFF4CAF50)
     val currentRoute = "camera"
+    val categoryResults = ""
 
     var showLoading by remember { mutableStateOf(false) }
+    var showBanner  by remember { mutableStateOf(false) }
+    var labelResult by remember { mutableStateOf<String?>(null) }
+    var confidenceResult by remember { mutableStateOf<Float?>(null) }
     val pictureBitmap = remember { mutableStateOf<Bitmap?>(null) }
     val cameraView = remember { mutableStateOf<CameraPreview?>(null) }
+    var runMessage by remember { mutableStateOf(false) }
+
+    val coroutineScope = rememberCoroutineScope()
 
     // Register the Java analysis result listener
     LaunchedEffect(Unit) {
@@ -69,6 +90,13 @@ fun CameraPreviewScreen(
             != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(activity!!, arrayOf(android.Manifest.permission.CAMERA), 101)
+        }
+    }
+
+    LaunchedEffect(showBanner) {
+        if (showBanner) {
+            delay(2500)          // 2.5초 노출 후
+            showBanner = false
         }
     }
 
@@ -98,11 +126,70 @@ fun CameraPreviewScreen(
             AndroidView(
                 factory = {
                     CameraPreview(it).apply {
-                        setPictureCallback { data, _ ->
-                            val bmp = BitmapFactory.decodeByteArray(data, 0, data.size)
-                            pictureBitmap.value = bmp
-                            Log.d("Camera", "사진 저장 완료")
+                        // Camera.PictureCallback implementation as per requirement
+                        val callback = Camera.PictureCallback { data, camera ->
+                            var photoFile = File(context.filesDir, "captured_image.jpg")
+                            FileOutputStream(photoFile).use { it.write(data) }
+
+                            showLoading = true
+
+                            Thread {
+                                try {
+                                    val result = SimpleImageAnalyzer.analyzeImageFile(context, photoFile.absolutePath)
+                                    val json = JSONObject(result)
+                                    labelResult = json.getString("label")
+                                    confidenceResult = json.getDouble("confidence").toFloat()
+                                } catch (e: Exception) {
+                                    labelResult = "오류"
+                                    confidenceResult = 0f
+                                } finally {
+                                    showLoading = false
+                                    // 촬영한 이미지 삭제
+                                    if (photoFile.exists()) {
+                                        photoFile.delete()
+                                        Log.d("DeleteImage","사진이 정상적으로 삭제됨")
+                                    }
+
+                                    // Evaluate confidence and navigate accordingly
+                                    val confidence = confidenceResult
+                                    if (confidence != null) {
+                                        if (confidence >= 0.5f) {
+                                            // confidence가 0.5 이상이면 label에 따라 ReformNavHost로 이동
+                                            val materialType = when (labelResult?.lowercase()) {
+                                                "can" -> "캔"
+                                                "plastic bottle" -> "플라스틱"
+                                                "food-wrapper" -> "비닐"
+                                                "paper" -> "종이"
+                                                else -> "기타"
+                                            }
+
+                                            Log.d("Result", "높은 신뢰도 - ReformNavHost로 이동: $materialType")
+
+                                            // UI 스레드에서 네비게이션 실행
+                                            Handler(Looper.getMainLooper()).post {
+                                                navController.navigate("reform/$materialType") {
+                                                    // 현재 화면을 스택에서 제거하여 뒤로가기 방지
+                                                    popUpTo(navController.graph.startDestinationId) {
+                                                        inclusive = true
+                                                    }
+                                                    // 같은 destination으로의 중복 이동 방지
+                                                    launchSingleTop = true
+                                                }
+                                            }
+                                        } else {
+                                            // confidence가 0.5 미만이면 기존 메시지 표시
+                                            Log.d("Result", "일반쓰레기 캇!")
+                                            runMessage = true
+                                            coroutineScope.launch {
+                                                delay(2500)
+                                                runMessage = false
+                                            }
+                                        }
+                                    }
+                                }
+                            }.start()
                         }
+                        setPictureCallback(callback)
                         cameraView.value = this
                     }
                 },
@@ -118,41 +205,13 @@ fun CameraPreviewScreen(
             Box(
                 modifier = Modifier
                     .size(64.dp)
-                    .background(darkGreen.copy(alpha = 0.7f), shape = MaterialTheme.shapes.extraLarge)
+                    .background(
+                        darkGreen.copy(alpha = 0.7f),
+                        shape = MaterialTheme.shapes.extraLarge
+                    )
                     .clickable {
                         showLoading = true
                         cameraView.value?.takePicture()
-
-                        cameraView.value?.setPictureCallback { data, _ ->
-                            val bmp = BitmapFactory.decodeByteArray(data, 0, data.size)
-                            pictureBitmap.value = bmp
-
-                            val filename = "captured_${UUID.randomUUID()}.jpg"
-                            val imageDir = File(context.filesDir, "images")
-                            imageDir.mkdirs()
-                            val file = File(imageDir, filename)
-                            try {
-                                FileOutputStream(file).use { out ->
-                                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, out)
-                                }
-                                Log.d("Camera", "사진 저장됨: ${file.absolutePath}")
-                                // Java에 이미지 전달하여 분석 시작
-                                SimpleImageAnalyzer.analyzeImageFile(file.absolutePath, object : SimpleImageAnalyzer.ResultListener {
-                                    override fun onResult(label: String, confidence: Float) {
-                                        Log.d("FlaskResult", "Label: $label, Confidence: $confidence")
-                                        // 여기서 label과 confidence 값을 활용할 수 있습니다.
-                                        showLoading = false
-                                    }
-                                    override fun onError(error: String) {
-                                        Log.e("FlaskResult", "오류 발생: $error")
-                                        showLoading = false
-                                    }
-                                })
-                            } catch (e: Exception) {
-                                Log.e("Camera", "사진 저장 중 오류: ${e.message}")
-                                showLoading = false
-                            }
-                        }
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -164,6 +223,10 @@ fun CameraPreviewScreen(
                 )
             }
         }
+    }
+    // Show detection message banner if triggered
+    if (runMessage) {
+        DetectionBanner()
     }
 }
 
@@ -203,6 +266,32 @@ fun LoadingDialog() {
             dismissOnClickOutside = false
         )
     )
+}
+
+@Composable
+fun DetectionBanner(
+    message: String = "재활용 불가! 일반쓰레기로 배출하세요",
+    bgColor: Color = Color(0xFFB00020),
+    textColor: Color = Color.White,
+    topMargin: Dp = 32.dp
+) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = topMargin, start = 24.dp, end = 24.dp, bottom = 8.dp)
+            .shadow(4.dp, RoundedCornerShape(50))
+            .clip(RoundedCornerShape(50))
+            .background(bgColor.copy(alpha = 0.7f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = message,
+            color = textColor,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 10.dp)
+        )
+    }
 }
 
 @Composable

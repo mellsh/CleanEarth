@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.cleanearth.CameraPreviewScreen
+import com.example.cleanearth.ReformNavHost
 import com.example.cleanearth.ui.theme.CleanEarthTheme
 
 // so tireeeeeeed
@@ -51,8 +52,46 @@ class MainActivity : ComponentActivity() {
                     }
                     // 추후 카메라
                     composable("scan") { CameraPreviewScreen(navController = navController)}
+                    // reform/{reformLabel} 경로로 ReformNavHost를 생성
+                    composable(
+                        route = "reform/{reformLabel}",
+                        arguments = listOf(
+                            androidx.navigation.navArgument("reformLabel") { type = androidx.navigation.NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val reformLabel = backStackEntry.arguments?.getString("reformLabel") ?: ""
+                        ReformNavHost(reformLable = reformLabel, navController = navController)
+                    }
+                    // MainActivity 또는 메인 네비게이션에서
+//                        composable(
+//                            route = "reform_nav_host/{materialType}",
+//                            arguments = listOf(navArgument("materialType") { type = NavType.StringType })
+//                        ) { backStackEntry ->
+//                            val materialType = backStackEntry.arguments?.getString("materialType") ?: "기타"
+//                            ReformNavHost(
+//                                reformLable = materialType,
+//                                navController = navController
+//                            )
+//                        }
+//
+//                        // 상세 화면 추가 (ReformNavHost에서 호출하는 detail 화면)
+//                        composable(
+//                            route = "detail/{ideaId}",
+//                            arguments = listOf(navArgument("ideaId") { type = NavType.StringType })
+//                        ) { backStackEntry ->
+//                            val ideaId = backStackEntry.arguments?.getString("ideaId") ?: return@composable
+//
+//                            val idea = ideasByCategory.values
+//                                .flatten()
+//                                .find { it.id == ideaId } ?: return@composable
+//
+//                            IdeaDetailScreen(
+//                                idea = idea,
+//                                onBack = { navController.navigate(IdeaDetailScreen(ideaId)) }
+//                            )
+//                        }
+                    }
                 }
             }
         }
     }
-}

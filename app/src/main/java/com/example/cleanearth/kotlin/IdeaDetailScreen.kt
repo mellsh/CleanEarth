@@ -19,6 +19,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.cleanearth.data.ReformIdea
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,7 +29,8 @@ fun IdeaDetailScreen(
     idea: ReformIdea,
     onBack: () -> Unit = {},
     onRetake: () -> Unit = {},   // 카메라 다시 찍기
-    onHome: () -> Unit = {}      // 홈으로 이동
+    onHome: () -> Unit = {},
+    navController: NavHostController// 홈으로 이동
 ) {
     val mainColor = Color(0xFF4CAF50)
     val white = Color(0xffffffff)
@@ -66,7 +69,11 @@ fun IdeaDetailScreen(
                 ) {
                     /* RETAKE */
                     FilledTonalButton(
-                        onClick = onRetake,
+                        onClick = {
+                            navController.navigate("camera") {
+                                popUpTo("idea_detail") { inclusive = true }
+                            }
+                        },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.filledTonalButtonColors(
                             containerColor = mainColor,
@@ -78,7 +85,11 @@ fun IdeaDetailScreen(
 
                     /* HOME */
                     OutlinedButton(
-                        onClick = onHome,
+                        onClick = {
+                            navController.navigate("main") {
+                                popUpTo("idea_detail") { inclusive = true }
+                            }
+                        },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = mainColor),
                         border = BorderStroke(1.dp, mainColor),
@@ -131,7 +142,7 @@ fun IdeaDetailScreen(
 
             Surface(
                 shape = MaterialTheme.shapes.medium,
-                tonalElevation = 4.dp,  // 입체감 ↑
+                tonalElevation = 4.dp,  // 입체감
                 border = BorderStroke(1.dp, Color.LightGray), // 테두리 추가
                 color = Color.White, // 흰 배경으로 시인성 ↑
                 modifier = Modifier

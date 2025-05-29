@@ -360,8 +360,8 @@ val plasticIdeas = listOf(
 // ───── 최종 맵 & 헬퍼 ─────
 val ideasByCategory: Map<String, List<ReformIdea>> = mapOf(
     "판지"       to cardboardIdeas,
-    "잔"         to glassIdeas,
-    "금속"       to metalIdeas,
+    "유리"         to glassIdeas,
+    "캔"       to metalIdeas,
     "비닐" to plasticBagIdeas,
     "종이"       to paperIdeas,
     "플라스틱"   to plasticIdeas

@@ -39,5 +39,5 @@ def predict():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5002)  # 포트 5002로 변경
+    app.run(host='0.0.0.0', port=5005)  # 포트 5002로 변경
     #app.run(host='0.0.0.0', port=5001)

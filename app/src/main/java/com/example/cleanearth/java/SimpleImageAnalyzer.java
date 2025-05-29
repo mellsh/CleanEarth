@@ -26,50 +26,39 @@ public class SimpleImageAnalyzer {
     private static AnalysisResultListener resultListener;
 
     // SimpleImageAnalyzer.java 내부에 추가
-    public static void analyzeImageFile(String imagePath, ResultListener listener) {
-        new Thread(() -> {
-            try {
-                System.out.println("파일에서 이미지 로드 중...");
-
-                File imageFile = new File(imagePath);
-                if (!imageFile.exists()) {
-                    listener.onError("오류: 이미지 파일이 존재하지 않습니다");
-                    return;
-                }
-
-                Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-                if (bitmap == null) {
-                    listener.onError("오류: 이미지를 로드할 수 없습니다");
-                    return;
-                }
-
-                System.out.println("이미지 크기: " + bitmap.getWidth() + "x" + bitmap.getHeight());
-
-                // Flask 서버로 전송
-                String result = sendBitmapToFlask(bitmap);
-
-                // 결과 파싱
-                JSONObject jsonResult = new JSONObject(result);
-                String label = jsonResult.getString("label");
-                double confidence = jsonResult.getDouble("confidence");
-
-                System.out.println("감지된 객체: " + label);
-                System.out.println("신뢰도: " + (confidence * 100) + "%");
-
-                // 결과 전달
-                listener.onResult(label, (float) confidence);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                listener.onError("오류: " + e.getMessage());
+    public static String analyzeImageFile(Context context, String filePath) {
+        try {
+            File imgFile = new File(filePath);
+            if (!imgFile.exists()) {
+                return "오류: 파일이 존재하지 않습니다.";
             }
-        }).start();
+
+            Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+            if (bitmap == null) {
+                return "오류: 이미지를 로드할 수 없습니다.";
+            }
+
+            String result = sendBitmapToFlask(bitmap);
+
+            JSONObject jsonResult = new JSONObject(result);
+            String label = jsonResult.optString("label", "Unknown");
+            double confidence = jsonResult.optDouble("confidence", -1.0);
+
+            System.out.println("감지된 객체: " + label);
+            System.out.println("신뢰도: " + (confidence * 100) + "%");
+
+            return result;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "오류: " + e.getMessage();
+        }
     }
 
     public static void setAnalysisResultListener(AnalysisResultListener listener) {
         resultListener = listener;
     }
-    private static final String FLASK_URL = "http://172.30.1.35:5002/predict"; // 로컬 에뮬레이터용 주소
+    private static final String FLASK_URL = "http://172.30.1.35:5005/predict";
 
     // drawable 리소스 ID로 분석 (기존 방식)
     public static String analyzeDrawableImage(Context context, int drawableResourceId) {
