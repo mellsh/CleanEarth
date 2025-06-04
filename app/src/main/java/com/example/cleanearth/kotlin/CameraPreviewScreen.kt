@@ -270,7 +270,7 @@ fun LoadingDialog() {
 
 @Composable
 fun DetectionBanner(
-    message: String = "재활용 불가! 일반쓰레기로 배출하세요",
+    message: String = "리폼이 불가능합니다.",
     bgColor: Color = Color(0xFFB00020),
     textColor: Color = Color.White,
     topMargin: Dp = 32.dp

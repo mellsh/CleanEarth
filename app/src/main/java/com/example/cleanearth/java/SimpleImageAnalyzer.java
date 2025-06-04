@@ -58,7 +58,7 @@ public class SimpleImageAnalyzer {
     public static void setAnalysisResultListener(AnalysisResultListener listener) {
         resultListener = listener;
     }
-    private static final String FLASK_URL = "http://172.30.1.35:5005/predict";
+    private static final String FLASK_URL = "http://172.30.1.14:5005/predict";
 
     // drawable 리소스 ID로 분석 (기존 방식)
     public static String analyzeDrawableImage(Context context, int drawableResourceId) {
